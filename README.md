@@ -40,17 +40,9 @@ Test Mode: In order to make tests, check box. This way transactions can be made 
 ```
 After getting values and entering correctly to the plugin setting page, it is highly recommended to test whether plugins works flawlessly. Don't forget to unmark test option when going live.
 
-## Built With
-
-* [PHP](http://www.http://php.net/) 
-
 ## Versioning
 
 Version 1.0.0
-
-## Authors
-
-*Muhammet UÇAN* - [mhmmtucan](https://github.com/mhmmtucan)
 
 ## Licence
 
