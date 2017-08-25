@@ -1,0 +1,110 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2017-08-10 15:00+0300\n"
+"PO-Revision-Date: 2017-08-10 15:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: mhmmtucan <mhmmtucan@gmail.com>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.1\n"
+"X-Poedit-Basepath: ../\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: woocommerce-papara-gateway.php:34
+msgid "Settings"
+msgstr "Ayarlar"
+
+#: woocommerce-papara.php:11 woocommerce-papara.php:12
+#: woocommerce-papara.php:43
+msgid "Papara"
+msgstr "Papara"
+
+#: woocommerce-papara.php:13
+msgid "Papara Payment Gateway Plug-in for WooCommerce"
+msgstr "Woocommerce için Papara Ödeme Yöntemi"
+
+#: woocommerce-papara.php:16
+msgid "Pay with Papara"
+msgstr "Papara ile Öde"
+
+#: woocommerce-papara.php:35
+msgid "Enable/Disable"
+msgstr "Aktif / Pasif"
+
+#: woocommerce-papara.php:37
+msgid "Enable Papara Payment Module."
+msgstr "Papara Ödeme Sistemini Aktif Et"
+
+#: woocommerce-papara.php:40
+msgid "Title:"
+msgstr "Başlık"
+
+#: woocommerce-papara.php:42
+msgid "This controls the title which the user sees during checkout."
+msgstr "Bu kısım ödeme sayfasında başlık olarak görünür."
+
+#: woocommerce-papara.php:45
+msgid "Company reference information:"
+msgstr "Üye iş yeri referans bilgisi"
+
+#: woocommerce-papara.php:47
+msgid "This information don't have to be unique."
+msgstr "Bu bilginin eşsiz olması gerekmez."
+
+#: woocommerce-papara.php:48
+msgid "Enter reference information"
+msgstr "Referans bilgisi giriniz."
+
+#: woocommerce-papara.php:50
+msgid "Description:"
+msgstr "Açıklama"
+
+#: woocommerce-papara.php:52
+msgid "This controls the description which the user sees during checkout."
+msgstr "Bu kısım kullanıcının satın alma kısmındaki açıklama ifadesini düzenler"
+
+#: woocommerce-papara.php:53
+msgid "Pay securely with Papara Payment System and Secure Servers."
+msgstr "Papara ile güvenle ödeyin."
+
+#: woocommerce-papara.php:55
+msgid "Api Key"
+msgstr "Api Key"
+
+#: woocommerce-papara.php:57
+msgid "Given to Merchant by Papara"
+msgstr "Papara Üye iş yeri heabından alınabilir."
+
+#: woocommerce-papara.php:60
+msgid "Secret Key"
+msgstr "Secret Key"
+
+#: woocommerce-papara.php:62
+msgid "In order to secure payments, can be found on Papara Merchant Account"
+msgstr "Ödemelerin güvenli hale getirilmesi için kullanılır."
+
+#: woocommerce-papara.php:65
+msgid "Test Mode"
+msgstr "Deneme Modu"
+
+#: woocommerce-papara.php:66
+msgid "Enable Test Mode"
+msgstr "Deneme Modunu Aktif Et"
+
+#: woocommerce-papara.php:68
+msgid "In order to make tests check box"
+msgstr "Aktifleştirmek için kutucuğu işaretleyin."
+
+#: woocommerce-papara.php:75
+msgid "Papara Payment Gateway"
+msgstr "Papara Ödeme Sistemi"
+
+#: woocommerce-papara.php:76
+msgid "Papara is most popular payment gateway for online shopping in Turkey"
+msgstr "Papara, Türkiye'deki en populer ve güvenilir ödeme sistemidir."
