@@ -1,4 +1,4 @@
-=== Papara Payment Module ===
+=== Papara ===
 Contributors: paparaadministrator, mhmmtucan
 Donate link: http://papara.com/
 Tags: papara, payment, woocommerce, credit card, ecommerce, e-commerce, store, sale, sell, shop, shopping, cart, checkout

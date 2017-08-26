@@ -48,7 +48,7 @@ class Papara_Payment extends WC_Payment_Gateway
                 'type' => 'textarea',
                 'description' => __('This controls the description which the user sees during checkout.', 'papara'),
                 'default' => __('Pay securely with Papara Payment System and Secure Servers.', 'papara')),
-            'working_key' => array(
+            'api_key' => array(
                 'title' => __('Api Key', 'papara'),
                 'type' => 'text',
                 'description' =>  __('Given to Merchant by Papara', 'papara'),
@@ -89,11 +89,11 @@ class Papara_Payment extends WC_Payment_Gateway
         global $woocommerce, $error_code;
         $order = new WC_Order($order_id);
 
-        // $response_data is the JSON object which papara returns after payment record creation (look for: Ödeme kaydı işlem sonucu)
-        $response_data = $this -> generate_papara_form($order_id);
+        // $result_ARRAY is the JSON object which papara returns after payment record creation (look for: Ödeme kaydı işlem sonucu)
+        $result_ARRAY = $this -> generate_papara_form($order_id);
 
-        if ($response_data != null) {
-            $this -> redirect_user($response_data['data']['paymentUrl']);
+        if ($result_ARRAY != null) {
+            $this -> redirect_user($result_ARRAY['data']['paymentUrl']);
         } else {
             // redirecting if an error occured during creating process of record payment
             $checkout_url = $woocommerce->cart->get_checkout_url();
@@ -102,19 +102,23 @@ class Papara_Payment extends WC_Payment_Gateway
             // error handling
             switch ($order->get_meta('error_code')) {
                 case 997:
-                    wc_add_notice(__('You have no right to accept payment, should talk to your customer representative.'), 'error');
+                    wc_add_notice(__('You have no right to accept payment, should talk to your customer representative.'), 'papara');
                     break;
                 case 998:
                     if ($order->get_total() < 1) {
-                        wc_add_notice(__('Payments less than 1 TRY are not accepted by Papara.'), 'error');
+                        wc_add_notice(__('Payments less than 1 TRY are not accepted by Papara.'), 'papara');
                     } elseif ($order->get_total() > 50000) {
-                        wc_add_notice(__('Payments more than 50000 TRY are not accepted by Papara.'), 'error');
+                        wc_add_notice(__('Payments more than 50000 TRY are not accepted by Papara.'), 'papara');
                     } else {
-                        wc_add_notice(__('Please contact with Papara.'), 'error');
+                        wc_add_notice(__('Please contact with Papara.'), 'papara');
                     }
                     break;
                 case 999:
-                    wc_add_notice(__('Something went wrong with Papara. Don\'t worry we\'ll figure it out.'), 'error');
+                    if ($this->get_option('api_key') == null) {
+                        wc_add_notice(__('There is an error with your API KEY, please check it!'), 'papara');
+                    } else {
+                        wc_add_notice(__('Something went wrong with Papara. Don\'t worry we\'ll figure it out.'), 'papara');
+                    }
                     break;
                 default:
                     break;
@@ -159,7 +163,7 @@ class Papara_Payment extends WC_Payment_Gateway
         $referenceId = $order_id;
         $redirect_Url = $this -> get_return_url($order);
         $notify_url = str_replace('https:', 'http:', add_query_arg('wc-api', 'Papara_Payment', home_url('/')));
-        $working_key = $this -> get_option('working_key');
+        $api_key = $this -> get_option('api_key');
 
         $payload = array(
                 'amount' => floatval($amount),
@@ -170,56 +174,58 @@ class Papara_Payment extends WC_Payment_Gateway
         );
 
         // posting request for payment record
-        $ch = curl_init($environment_url);
-        curl_setopt_array($ch, array(
+        $create_payment_POST = curl_init($environment_url);
+        curl_setopt_array($create_payment_POST, array(
                 CURLOPT_POST => true,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HTTPHEADER => array(
-                'ApiKey: '.$working_key,
+                'ApiKey: '.$api_key,
                 'Content-Type: application/json'
                 ),
                 CURLOPT_POSTFIELDS => json_encode($payload)
             ));
-        $response = curl_exec($ch);
-        if ($response === false) {
-            die(curl_error($ch));
+        
+        // mixed return; will return the result on success, FALSE on failure.
+        $result_JSON = curl_exec($create_payment_POST);
+        if ($result_JSON === false) {
+            $order->update_status('failed');
+            die(curl_error($create_payment_POST));
         }
-        $response_data = json_decode($response, true);
-        curl_close($ch);
+        $result_ARRAY = json_decode($result_JSON, true);
+        curl_close($create_payment_POST);
 
-        // checking information for first payment record, if fails there is sth wrong
-        // if there is sth wrong, no need to check, so take error code and return
-        if ($response_data['error']['code'] != 0) {
-            $order->add_meta_data('error_code', $response_data['error']['code'], true);
+        // if there is sth wrong, no need to check with GET method, so take error code and return
+        if ($result_ARRAY['succeeded'] == false) {
+            $order->add_meta_data('error_code', $result_ARRAY['error']['code'], true);
             $order->update_status('failed');
             return null;
         }
-        $ch1 = curl_init();
-        curl_setopt_array($ch1, array(
-                CURLOPT_URL => $environment_url.'?id='.$response_data['data']['id'],
+
+        // checking information for first payment record, if fails there is sth wrong
+        $result_verification_GET = curl_init();
+        curl_setopt_array($result_verification_GET, array(
+                CURLOPT_URL => $environment_url.'?id='.$result_ARRAY['data']['id'],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HTTPHEADER => array(
-                'ApiKey: '.$working_key,
+                'ApiKey: '.$api_key,
                 'Content-Type: application/json'
                 )
             ));
-        $check_first_response = curl_exec($ch1);
-        if ($check_first_response === false) {
-            die(curl_error($ch1));
+
+        // mixed return; will return the result on success, FALSE on failure.
+        $verified_result_JSON = curl_exec($result_verification_GET);
+        if ($verified_result_JSON === false) {
+            $order->update_status('failed');
+            die(curl_error($result_verification_GET));
         }
-        $check_first_response_data = json_decode($check_first_response, true);
-        curl_close($ch1);
+        $verified_result_ARRAY = json_decode($verified_result_JSON, true);
+        curl_close($result_verification_GET);
 
         // check for POST data if it is successful and check for papara db if it is exists, then continue
-        if ($response_data['succeeded'] == true && $check_first_response_data['succeeded'] == 1) {
+        if ($result_ARRAY['succeeded'] == true && $verified_result_ARRAY['succeeded'] == 1) {
             // payment record created
             $order->update_status('pending');
-            return $response_data;
-        } else {
-            // error
-            $order->update_meta_data('error_code', $response_data['error']['code'], true);
-            $order->update_status('failed');
-            return null;
+            return $result_ARRAY;
         }
     }
 
@@ -232,43 +238,42 @@ class Papara_Payment extends WC_Payment_Gateway
     * Checking information which papara made before redirecting user to the merchant site
     * If there is an error, return error code to ipn
     */
-    public function check_papara_response()
+    public function check_papara_refund_request_result_JSON()
     {
-
         // taking data which sent with IPN
         $data = json_decode(file_get_contents('php://input'), true);
         $order = new WC_Order($data['referenceId']);
 
         $environment_url = ($this -> get_option('environment') == 'TRUE') ? 'https://merchant-api.papara.com/payments' : 'https://merchantapi-test-master.papara.com/payments';
-        $working_key = $this -> get_option('working_key');
+        $api_key = $this -> get_option('api_key');
         $order->set_transaction_id($data['id']);
 
-
         // checking for IPN whether payment was successful or not
-        $ch2 = curl_init();
-        curl_setopt_array($ch2, array(
+        $check_payment_GET = curl_init();
+        curl_setopt_array($check_payment_GET, array(
                 CURLOPT_URL => $environment_url.'?id='.$data['id'],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HTTPHEADER => array(
-                'ApiKey: '.$working_key,
+                'ApiKey: '.$api_key,
                 'Content-Type: application/json'
                 )
             ));
-        $check_second_response = curl_exec($ch2);
-        if ($check_second_response === false) {
-            die(curl_error($ch2));
+        // mixed return; will return the result on success, FALSE on failure.
+        $data_sentWithIPN_JSON = curl_exec($check_payment_GET);
+        if ($data_sentWithIPN_JSON === false) {
+            die(curl_error($check_payment_GET));
         }
-        $check_second_response_data = json_decode($check_second_response, true);
-        curl_close($ch2);
+        $data_sentWithIPN_ARRAY = json_decode($data_sentWithIPN_JSON, true);
+        curl_close($check_payment_GET);
 
         /**
         * Verifications of payments
         */
 
         // HTTP GET to /payments
-        if ($check_second_response_data['succeeded'] != 1) {
+        if ($data_sentWithIPN_ARRAY['succeeded'] != 1) {
             die('WooCommerce - RECORD WITH ID IS NOT FOUND');
-        } elseif ($check_second_response_data['succeeded'] == 1) {
+        } elseif ($data_sentWithIPN_ARRAY['succeeded'] == 1) {
             // if papara IPN was not send yet due to some problems; however with get request to payment, transaction found in papara db,
             // so check if 'succeeded' and send ok then return
             $order->update_status('processing');
@@ -315,7 +320,7 @@ class Papara_Payment extends WC_Payment_Gateway
     {
         $order = new WC_Order($order_id);
 
-        if (0 == $amount || null == $amount) {
+        if ($amount == 0 || $amount == null) {
             return new WP_Error('papara', __('Refund Error: You need to specify a refund amount.', 'papara'));
         }
         // notification for full refunds
@@ -324,26 +329,26 @@ class Papara_Payment extends WC_Payment_Gateway
         }
 
         $environment_url = ($this -> get_option('environment') == 'TRUE') ? 'https://merchant-api.papara.com/payments' : 'https://merchantapi-test-master.papara.com/payments';
-        $working_key = $this -> get_option('working_key');
+        $api_key = $this -> get_option('api_key');
 
         // HTTP PUT request for refund
-        $ch3 = curl_init();
-        curl_setopt_array($ch3, array(
+        $refund_request_PUT = curl_init();
+        curl_setopt_array($refund_request_PUT, array(
                 CURLOPT_URL => $environment_url.'?id='.$order->get_transaction_id(),
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_CUSTOMREQUEST => 'PUT',
                 CURLOPT_HTTPHEADER => array(
-                'ApiKey: '.$working_key,
+                'ApiKey: '.$api_key,
                 'Content-Type: application/json'
                 ),
                 CURLOPT_POSTFIELDS => ''
             ));
-        $response = curl_exec($ch3);
-        $response_data = json_decode($response, true);
+        $refund_request_result_JSON = curl_exec($refund_request_PUT);
+        $refund_request_result_ARRAY = json_decode($refund_request_result_JSON, true);
 
-        if ($response_data['succeeded'] == true) {
+        if ($refund_request_result_ARRAY['succeeded'] == true) {
             $order->update_status('refunded');
-            curl_close($ch3);
+            curl_close($refund_request_PUT);
 
             // notify user, not an error
             return new WP_Error('papara', __('Refund succeeded!', 'papara'));
