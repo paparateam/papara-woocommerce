@@ -102,22 +102,22 @@ class Papara_Payment extends WC_Payment_Gateway
             // error handling
             switch ($order->get_meta('error_code')) {
                 case 997:
-                    wc_add_notice(__('You have no right to accept payment, should talk to your customer representative.'), 'papara');
+                    wc_add_notice(__('Ödeme kabul etme yetkiniz yok. Müşteri temsilciniz ile görüşmelisiniz.'), 'error');
                     break;
                 case 998:
                     if ($order->get_total() < 1) {
-                        wc_add_notice(__('Payments less than 1 TRY are not accepted by Papara.'), 'papara');
+                        wc_add_notice(__('1 liradan az ödemeler Papara tarafından kabul edilmemektedir.'), 'error');
                     } elseif ($order->get_total() > 50000) {
-                        wc_add_notice(__('Payments more than 50000 TRY are not accepted by Papara.'), 'papara');
+                        wc_add_notice(__('50.000 liradan fazla ödemeler Papara tarafından kabul edilmemektedir.'), 'error');
                     } else {
-                        wc_add_notice(__('Please contact with Papara.'), 'papara');
+                        wc_add_notice(__('Lütfen Papara ile temasa geçin.'), 'error');
                     }
                     break;
                 case 999:
                     if ($this->get_option('api_key') == null) {
-                        wc_add_notice(__('There is an error with your API KEY, please check it!'), 'papara');
+                        wc_add_notice(__('API Key ile ilgili bir sorun oluştu lütfen kontrol edin.'), 'error');
                     } else {
-                        wc_add_notice(__('Something went wrong with Papara. Don\'t worry we\'ll figure it out.'), 'papara');
+                        wc_add_notice(__('Papara ile ilgili bir şeyler ters gitti. Kısa bir süre sonra tekrar deneyin.'), 'error');
                     }
                     break;
                 default:
