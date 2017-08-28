@@ -179,7 +179,7 @@ class Papara_Payment extends WC_Payment_Gateway
             'headers' => array(
                 'ApiKey' => $api_key,
                 'Content-Type' => 'application/json'
-            ),
+            )
         );
 
         // posting request for payment record
@@ -299,7 +299,6 @@ class Papara_Payment extends WC_Payment_Gateway
             $order->update_status('cancelled');
             die('WooCommerce - ORDER WAS CANCELLED');
         }
-
         die('OK');
     }
 
