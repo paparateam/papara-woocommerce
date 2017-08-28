@@ -1,0 +1,24 @@
+{
+    "remotePath": "wp-content/plugins/papara",
+    "host": "ftp.narcoder.com",
+    "username": "muhammet@narcoder.com",
+    "password": "Muhammet17",
+    "port": 21,
+    "secure": false,
+    "protocol": "ftp",
+    "uploadOnSave": true,
+    "passive": false,
+    "debug": false,
+    "privateKeyPath": null,
+    "passphrase": null,
+    "ignore": [
+        "\\.vscode",
+        "\\.git",
+        "\\.DS_Store"
+    ],
+    "generatedFiles": {
+        "uploadOnSave": true,
+        "extensionsToInclude": [],
+        "path": "wp-content/plugins/papara"
+    }
+}
